@@ -1,5 +1,5 @@
 "use client"
-import React from 'react'
+import React, { useEffect } from 'react'
 import {
 
   SignInButton,
@@ -13,17 +13,35 @@ import { useStoreUser } from '@/Hooks/use-store-user'
 import { BarLoader } from 'react-spinners'
 import Link from 'next/link'
 import Image from 'next/image'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from "next/navigation";
 import { Button } from './ui/button'
 import { LayoutDashboard } from 'lucide-react'
+
 
 const Header = () => {
   const{isLoading,isAuthenticated}=useStoreUser();
   const path=usePathname();
+  const router=useRouter()
 
-  if(path.includes("/dashboard")){
+   // Redirect authenticated users from landing page to feed
+  useEffect(() => {
+    if (!isLoading && isAuthenticated && path === "/") {
+      router.push("/feed");
+    }
+  }, [isLoading, isAuthenticated, path, router]);
+
+   // Hide header on dashboard and public profile/post pages
+  if (path.includes("/dashboard")) {
+    return null;
+  }
+
+   // Hide header on dashboard and public profile/post pages (but not on feed)
+  if(path!="/" && path!=="/feed" && path.split("/".length>=2)){
     return null
   }
+
+
+
 
   return (
     <header className='fixed  top-6 left-1/2 transform -translate-x-1/2 z-50 w-full max-w-3xl px-4'>

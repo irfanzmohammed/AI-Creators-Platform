@@ -18,6 +18,9 @@ import {
 } from "@/components/ui/select"
 
 import { Input } from "@/components/ui/input";
+import { Button } from './ui/button';
+import { Plus, X } from 'lucide-react';
+import { Badge } from './ui/badge';
 
 const CATEGORIES = [
   "Technology",
@@ -43,7 +46,32 @@ const PostEditorSettings = ({
      const { watch, setValue } = form;
      const watchedValues=watch();
 
-     const handleTagInput=()=>{}
+       const handleTagInput=(e)=>{
+      if(e.key==="Enter" || e.key===","){
+       e.preventDefault();
+        addTag();
+      }
+     }
+
+
+     const addTag = () => {
+    const tag = tagInput.trim().toLowerCase();
+    if (
+      tag &&
+      !watchedValues.tags.includes(tag) &&
+      watchedValues.tags.length < 10
+    ) {
+      setValue("tags", [...watchedValues.tags, tag]);
+      setTagInput("");
+    }
+  };
+
+  const removeTag = (tagToRemove) => {
+    setValue(
+      "tags",
+      watchedValues.tags.filter((tag) => tag !== tagToRemove)
+    );
+  };
 
   return (
    <Dialog open={isOpen} onOpenChange={onClose}>
@@ -74,20 +102,71 @@ const PostEditorSettings = ({
         </div>
         <div className='space-y-3'>
             <label className='text-sm font-medium text-white'>Tags</label>
-            <div className='flex space-x-2'>
+            <div className='flex space-x-2 mt-2'>
                 <Input
-                value={setTagInput}
+                value={tagInput}
                 onChange={(e)=>setTagInput(e.target.value)}
                 onKeyDown={handleTagInput}
                 className="bg-slate-800 border-slate-600" 
                 placeholder="Add tags..."
-            
                 />
-
+                <Button
+                type="button"
+                className="border-slate-600"
+                size="sm"
+                variant="outline"
+                onClick={addTag}
+                >
+                <Plus  className="h-4 w-4"/>
+                </Button>
             </div>
 
+            {
+              watchedValues.tags.length>0 &&(
+                <div className='flex flex-wrap gap-2'>
+                 {
+                   watchedValues.tags.map((tag, index) => (
+                  <Badge
+                  key={index}
+                  variant="secondary"
+                  className="bg-purple-500/20 text-purple-300 bg-purple-500/30"
+                  >
+                  {tag}
+                  <button
+                  type="button"
+                  onClick={()=>removeTag(tag)}
+                  className='ml-1 hover:text-red-300'>
+                    <X className='h-3 w-3'/>
+                  </button>
+
+
+                  </Badge>
+                ))
+                 }
+                </div>
+              )
+            }
         </div>
+        <p className='text-xs text-slate-400'>
+          {watchedValues.tags.length}/10 tags • Press Enter or comma to add
+        </p>
     </div>
+    {
+      mode==="create" &&(
+        <div className='space-y-2'>
+          <label className='text-white text-sm font-medium'>Schedule Publication</label>
+          <Input
+          type="datetime-local"
+          value={watchedValues.scheduledFor}
+          onChange={(e)=>setValue("scheduledFor",e.target.value)}
+          className="bg-slate-800 border-slate-600"
+          min={new Date().toISOString().slice(0, 16)}
+          />
+          <p className='text-xs text-slate-400'> Leave empty to publish immediately</p>
+
+        </div>
+      )
+    }
   </DialogContent>
   </Dialog>
   )

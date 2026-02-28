@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { Button } from './ui/button';
-import { ArrowLeft, Badge, Loader2, Save, Send, Settings } from 'lucide-react';
+import { ArrowLeft,  Loader2, Save, Send, Settings } from 'lucide-react';
+import { Badge } from "@/components/ui/badge";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -45,8 +46,10 @@ const PostEditorHeader = ({
             isDraft &&(
               <Badge
               variant="secondary"
-              className='bg-orange-500/20 text-orange-300 border-orange-500/30'
-              >Draft</Badge>
+              className="bg-orange-500/20 text-orange-300 border-orange-500/30"
+            >
+              Draft
+            </Badge>
             )
           }
         </div>

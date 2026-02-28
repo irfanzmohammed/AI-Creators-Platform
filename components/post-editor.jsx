@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import z from 'zod'
 import {zodResolver} from  "@hookform/resolvers/zod"
@@ -10,6 +10,8 @@ import { useRouter } from 'next/navigation'
 import PostEditorHeader from './post-editor-header'
 import PostEditorContent from './post-editor-content'
 import PostEditorSettings from './post-editor-settings';
+import { toast } from 'sonner';
+import ImageUploadModal from './ui/image-upload-modal';
 
 const postSchema=z.object({
   title:z.string().min(1,'Title is required').max(20,'title too long'),
@@ -46,9 +48,107 @@ const{mutate:updatePost, isLoading:isUpdating}=useConvexMutation(api.posts.updat
     },
   })
 
-  const handleSave=()=>{}
-  const handlePublish=()=>{}
-  const handleSchedule=()=>{}
+  const {handleSubmit,watch,setValue}=form;
+  const watchedValues=watch();
+
+ 
+ //autosave drafts
+  useEffect(()=>{
+     if(!watchedValues.title && !watchedValues.content) return;
+     const autoSave=setInterval(()=>{
+           if(watchedValues.title || watchedValues.content) {
+            if(mode === "create" ) handleSave(true) //silent save
+           }
+     },30000)
+     return(()=>clearInterval(autoSave))
+  },[watchedValues.content, watchedValues.title])
+
+  const onSubmit=async(data, action, silent=false)=>{
+    try{
+      const postData = {
+        title: data.title,
+        content: data.content,
+        category: data.category || undefined,
+        tags: data.tags,
+        featuredImage: data.featuredImage || undefined,
+        status: action === "publish" ? "published" : "draft",
+        scheduledFor: data.scheduledFor
+          ? new Date(data.scheduledFor).getTime()
+          : undefined,
+      };
+
+      let resultId;
+
+      if(mode==="edit" && initialData?._id){
+          // Always use update for edit mode
+          resultId=await updatePost({
+            id:initialData?._id,
+            ...postData,
+          })
+      }
+
+      else if(initialData?._id && action==="draft"){
+           // If we have existing draft data, update it
+         resultId=await updatePost({
+            id:initialData?._id,
+            ...postData,
+          })
+      }
+      else{
+         // Create new post (will auto-update existing draft if needed)
+        resultId=await createPost(postData);
+      }
+
+      if(!silent){
+        const message=
+        action==="publish"? "Post published!":"Draft Saved"
+        toast.success(message)
+
+        if(action==="publish") router.push("/dashboard/posts");
+        return resultId
+      }
+    }
+
+    catch(error){
+     if(!silent) toast.error(error.message || "Failed to save post");
+     throw error
+    }
+  }
+
+   const handleSave=(silent=false)=>{
+   handleSubmit((data)=>onSubmit(data, "draft", silent))();
+
+  }
+
+  const handlePublish=()=>{
+     handleSubmit((data)=>onSubmit(data, "publish"))();
+
+  }
+  const handleSchedule=()=>{
+    if(!watchedValues.scheduledFor){
+      toast.error("Plaese select a a date and time to schedule");
+      return;
+    }
+      handleSubmit((data)=>onSubmit(data, "schedule"))();
+  }
+
+  const handleImageSelect=(imageData)=>{
+     if(imageModalType==="featured"){
+      setValue("featuredImage", imageData.url)
+      toast.success("Featured image added!")
+     }
+     else if(imageModalType==="content" &&quillRef){
+        const quill=quillRef.getEditor();
+        const range=quill.getSelection();
+        const index=range? range.index : quill.getLength();
+
+        quill.insertEmbed(index, "image",imageData.url)
+        quill.setSelection(index +1);
+        toast.success("Image inserted!")
+     }
+
+     setIsImageModalOpen(false)
+  }
 
   return (
     <div className='min-h-screen bg-slate-900 text-white'>
@@ -82,6 +182,17 @@ const{mutate:updatePost, isLoading:isUpdating}=useConvexMutation(api.posts.updat
       mode={mode}
       />
       {/* image dialog */}
+      <ImageUploadModal
+      isOpen={isImageModalOpen}
+      onClose={()=>setIsImageModalOpen(false)}
+      onImageSelect={handleImageSelect}
+      title={
+        imageModalType==="featured"?
+        "Upload & Transform Image":
+        "Insert Image"
+
+      }
+      />
 
     </div>
   )
