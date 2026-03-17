@@ -8,12 +8,13 @@ import { toast } from "sonner";
 import dynamic from "next/dynamic";
 import { generateBlogContent, improveContent } from "@/app/actions/ai";
 import { BarLoader } from "react-spinners";
+import "react-quill-new/dist/quill.snow.css";
 
 const ReactQuill = dynamic(() => import("react-quill-new"), { ssr: false });
 
-if (typeof window !== "undefined") {
-  import("react-quill-new/dist/quill.snow.css");
-}
+// if (typeof window !== "undefined") {
+//   import("react-quill-new/dist/quill.snow.css");
+// }
 
 const quillConfig = {
   modules: {
@@ -85,14 +86,26 @@ export default function PostEditorContent({
     if (type === "generate") {
       if (!title?.trim())
         return toast.error("Please add a title before generating content");
-      if (
-        content &&
-        content !== "<p><br></p>" &&
-        !window.confirm("This will replace your existing content. Continue?")
-      )
-        return;
+     const isContentEmpty = (content) => {
+  if (!content) return true;
+
+  const cleaned = content
+    .replace(/<(.|\n)*?>/g, "")
+    .replace(/&nbsp;/g, "")
+    .trim();
+
+  return cleaned.length === 0;
+};
+
+if (!isContentEmpty(content) &&
+    !window.confirm("This will replace your existing content. Continue?")
+) {
+  return;
+}
       setIsGenerating(true);
-    } else {
+    } 
+    
+    else {
       if (!content || content === "<p><br></p>")
         return toast.error("Please add some content before improving it");
       setIsImproving(true);
@@ -120,8 +133,12 @@ export default function PostEditorContent({
   };
 
   const hasTitle = watchedValues.title?.trim();
-  const hasContent =
-    watchedValues.content && watchedValues.content !== "<p><br></p>";
+  
+ const hasContent = watchedValues.content
+  ?.replace(/<(.|\n)*?>/g, "")
+  .replace(/&nbsp;/g, "")
+  .trim().length > 0;
+
 
   return (
     <>
