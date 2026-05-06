@@ -36,12 +36,9 @@ const Header = () => {
   }
 
    // Hide header on dashboard and public profile/post pages (but not on feed)
-  if(path!="/" && path!=="/feed" && path.split("/".length>=2)){
+   if (path !== "/" && path !== "/feed" && path.split("/").length >= 2) {
     return null
   }
-
-
-
 
   return (
     <header className='fixed  top-6 left-1/2 transform -translate-x-1/2 z-50 w-full max-w-3xl px-4'>
@@ -79,9 +76,9 @@ const Header = () => {
          <div className='flex items-center gap-2 sm:gap-3 flex-shrink-0'>
            <Authenticated>
            <Link href="/dashboard">
-           <Button variant="outline" className="hidden sm:flex" size="sm">
+           <Button variant="outline" className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4" size="sm">
            <LayoutDashboard className='h-4 w-4'/>
-           <span className='hidden md:inline ml-2 '>Dashboard</span>
+           <span className='hidden md:inline '>Dashboard</span>
            </Button>
            </Link>
               <UserButton />
