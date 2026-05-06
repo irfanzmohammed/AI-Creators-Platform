@@ -10,7 +10,7 @@ import { toast, Toaster } from "sonner"
 const inter=Inter({subsets:["latin"]})
 
 export const metadata = {
-  title: "AI Content Platform",
+  title: "Creatify",
   description: "Content creation powered by AI",
 };
 
