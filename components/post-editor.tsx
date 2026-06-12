@@ -267,7 +267,6 @@ const PostEditor = ({ initialData = null, mode = "create" }: PostEditorProps) =>
   const { handleSubmit, watch, setValue } = form;
   const watchedValues = watch();
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (!watchedValues.title && !watchedValues.content) return;
     const autoSave = setInterval(() => {
@@ -276,6 +275,7 @@ const PostEditor = ({ initialData = null, mode = "create" }: PostEditorProps) =>
       }
     }, 30000);
     return () => clearInterval(autoSave);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [watchedValues.content, watchedValues.title]);
 
   const onSubmit = async (

@@ -104,11 +104,11 @@ export const useConvexMutation = <T,>(mutation: any) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<Error | null>(null);
 
-  const mutate = async (...args: any[]): Promise<T | undefined> => {
+ const mutate = async (args?: any): Promise<T | undefined> => {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await mutationFn(...args) as T;
+      const response = await mutationFn(args) as T;
       setData(response);
       return response;
     } catch (err) {
