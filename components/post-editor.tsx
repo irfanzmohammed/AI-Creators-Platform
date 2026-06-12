@@ -246,9 +246,10 @@ const PostEditor = ({ initialData = null, mode = "create" }: PostEditorProps) =>
   const router = useRouter();
 
   const { mutate: createPost, isLoading: isCreateLoading } =
-    useConvexMutation(api.posts.create);
+    useConvexMutation<string>(api.posts.create);
+
   const { mutate: updatePost, isLoading: isUpdating } =
-    useConvexMutation(api.posts.update);
+    useConvexMutation<string>(api.posts.update);
 
   const form = useForm<PostFormValues>({
     resolver: zodResolver(postSchema),
@@ -296,7 +297,7 @@ const PostEditor = ({ initialData = null, mode = "create" }: PostEditorProps) =>
           : undefined,
       };
 
-      let resultId: any;
+       let resultId: string | undefined;
 
       if (mode === "edit" && initialData?._id) {
         resultId = await updatePost({ id: initialData._id, ...postData });
