@@ -72,8 +72,8 @@ import { useMutation, useQuery } from "convex/react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
-export const useConvexQuery = <T,>(query: any, ...args: any[]) => {
-  const result = useQuery(query, ...args) as T | undefined;
+export const useConvexQuery = <T,>(query: any, args?: any) => {
+  const result = useQuery(query, args) as T | undefined;
   const [data, setData] = useState<T | undefined>(undefined);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<Error | null>(null);

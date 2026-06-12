@@ -224,7 +224,7 @@ const postSchema = z.object({
   scheduledFor: z.string().optional(),
 });
 
-// ✅ Type inferred directly from Zod schema
+//  Type inferred directly from Zod schema
 type PostFormValues = z.infer<typeof postSchema>;
 
 type PostAction = "publish" | "draft" | "schedule";
@@ -267,6 +267,7 @@ const PostEditor = ({ initialData = null, mode = "create" }: PostEditorProps) =>
   const { handleSubmit, watch, setValue } = form;
   const watchedValues = watch();
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (!watchedValues.title && !watchedValues.content) return;
     const autoSave = setInterval(() => {
